@@ -7,17 +7,17 @@
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
-    margin: 0; padding: 0; height: 100%; overflow: hidden;
+    margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
     background: #000; color: #cfcfcf;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-user-select: none; user-select: none; touch-action: none;
   }
-  #wrap { display: flex; flex-direction: column; height: 100%; }
-  #screen { flex: 1; position: relative; min-height: 0; background: #000; }
+  #wrap { position: relative; width: 100%; height: 100vh; height: 100dvh; overflow: hidden; background: #000; }
+  #screen { position: absolute; inset: 0; background: #000; }
   canvas {
     display: block; width: 100%; height: 100%;
     object-fit: contain; image-rendering: pixelated; outline: none;
-    background: #000;
+    background: #000; touch-action: none;
   }
 
   #boot {
@@ -45,17 +45,31 @@
   #log .e { color: #ff8f8f; }
   #log .i { color: #6ea8ff; }
 
-  #pad { flex: 0 0 auto; padding: 8px 10px 14px; background: #0a0a0a; }
+  #pad {
+    position: absolute; z-index: 12; left: 0; right: 0; bottom: max(10px, env(safe-area-inset-bottom));
+    width: min(620px, 100%); margin: auto; padding: 8px 12px;
+    pointer-events: none; background: transparent;
+  }
   #pad.hidden { display: none; }
+  #pad:not(.show) { visibility: hidden; }
   .row { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
   .btn {
-    border: 0; border-radius: 10px; background: #1c1c1c; color: #d8d8d8;
-    font-size: 15px; font-weight: 600; height: 50px; min-width: 52px;
+    border: 1px solid #ffffff2e; border-radius: 12px; background: #161616bb; color: #e4e4e4;
+    font-size: 15px; font-weight: 600; height: 46px; min-width: 48px;
     display: flex; align-items: center; justify-content: center; flex: 1;
+    pointer-events: auto; touch-action: none; backdrop-filter: blur(4px);
   }
   .btn:active, .btn.on { background: #b81b1b; color: #fff; }
   .btn.wide { flex: 1.6; }
   .btn.small { font-size: 11px; letter-spacing: 0.05em; }
+  #hud { position: absolute; z-index: 30; top: max(10px, env(safe-area-inset-top)); right: max(10px, env(safe-area-inset-right)); display: flex; gap: 8px; }
+  #hud.hidden, #help.hidden { display: none; }
+  .hud-btn { width: 42px; height: 42px; border: 1px solid #ffffff40; border-radius: 10px; color: #fff; background: #111b; font-size: 20px; backdrop-filter: blur(5px); }
+  .hud-btn:active, .hud-btn.on { background: #b81b1b; }
+  #help { position: absolute; z-index: 25; top: max(60px, calc(env(safe-area-inset-top) + 52px)); right: max(10px, env(safe-area-inset-right)); width: min(320px, calc(100vw - 20px)); padding: 14px 16px; color: #eee; background: #090d0eed; border: 1px solid #ffffff35; border-radius: 10px; font-size: 12px; line-height: 1.7; }
+  #help strong { color: #e4b33d; }
+  @media (pointer: fine) { #touchToggle { display: none; } #pad { display: none; } }
+  @media (max-width: 700px) { #bootTitle { font-size: 22px; } #bootHint { max-width: 320px; line-height: 1.6; } .btn { height: 42px; min-width: 42px; } .row { gap: 6px; margin-top: 6px; } #pad { padding: 6px 10px; } .hud-btn { width: 40px; height: 40px; } }
 </style>
 </head>
 <body>
@@ -64,7 +78,7 @@
     <canvas id="canvas" tabindex="-1" oncontextmenu="event.preventDefault()"></canvas>
     <div id="boot">
       <div id="bootTitle">DOOM</div>
-      <div id="bootHint">Freedoom &middot; Chocolate Doom (WebAssembly)</div>
+      <div id="bootHint">Freedoom &middot; Chocolate Doom (WebAssembly)<br>Arrows to move and turn &middot; A / D strafe &middot; Ctrl fire &middot; Space use</div>
       <button id="bootBtn" type="button" disabled>LOADING…</button>
       <div id="log"></div>
     </div>
@@ -75,8 +89,8 @@
       <button class="btn" data-key="ArrowLeft"  type="button">&#8630;</button>
       <button class="btn" data-key="ArrowUp"    type="button">&#9650;</button>
       <button class="btn" data-key="ArrowRight" type="button">&#8631;</button>
-      <button class="btn small" data-key="KeyQ" type="button">&lt; STR</button>
-      <button class="btn small" data-key="KeyE" type="button">STR &gt;</button>
+      <button class="btn small" data-key="KeyA" type="button">&lt; STR</button>
+      <button class="btn small" data-key="KeyD" type="button">STR &gt;</button>
     </div>
     <div class="row">
       <button class="btn wide" data-key="Control"   type="button">FIRE</button>
@@ -92,6 +106,19 @@
       <button class="btn small" data-key="Escape" type="button">ESC</button>
     </div>
   </div>
+
+  <div id="hud" class="hidden" aria-label="Game options">
+    <button id="touchToggle" class="hud-btn" type="button" aria-label="Toggle touch controls" aria-expanded="false">☷</button>
+    <button id="helpToggle" class="hud-btn" type="button" aria-label="Show controls">?</button>
+    <button id="fullscreenBtn" class="hud-btn" type="button" aria-label="Toggle fullscreen">⛶</button>
+  </div>
+  <div id="help" class="hidden" role="dialog" aria-label="Game controls">
+    <strong>CONTROLS</strong><br>
+    Arrows: move and turn &middot; A / D: strafe<br>
+    Ctrl / left click: fire &middot; Space: use doors<br>
+    Shift: run &middot; 1–3: weapons<br>
+    Tap the fullscreen icon for immersive play.
+  </div>
 </div>
 
 <script>
@@ -102,7 +129,13 @@
   var boot = document.getElementById('boot');
   var bootBtn = document.getElementById('bootBtn');
   var pad = document.getElementById('pad');
+  var hud = document.getElementById('hud');
+  var touchToggle = document.getElementById('touchToggle');
+  var fullscreenBtn = document.getElementById('fullscreenBtn');
+  var help = document.getElementById('help');
+  var wrap = document.getElementById('wrap');
   var logEl = document.getElementById('log');
+  var touchDevice = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 760;
 
   var lines = 0;
   function log(msg, cls) {
@@ -139,6 +172,8 @@
     Enter:      { key: 'Enter',      code: 'Enter',       keyCode: 13 },
     KeyQ:       { key: 'q',          code: 'KeyQ',        keyCode: 81 },
     KeyE:       { key: 'e',          code: 'KeyE',        keyCode: 69 },
+    KeyA:       { key: 'a',          code: 'KeyA',        keyCode: 65 },
+    KeyD:       { key: 'd',          code: 'KeyD',        keyCode: 68 },
     Digit1:     { key: '1',          code: 'Digit1',      keyCode: 49 },
     Digit2:     { key: '2',          code: 'Digit2',      keyCode: 50 },
     Digit3:     { key: '3',          code: 'Digit3',      keyCode: 51 }
@@ -193,6 +228,39 @@
     send(runOn ? 'keydown' : 'keyup', 'Shift');
   });
 
+  function setTouchControls(open) {
+    pad.classList.toggle('show', open);
+    touchToggle.classList.toggle('on', open);
+    touchToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+
+  touchToggle.addEventListener('click', function () {
+    setTouchControls(!pad.classList.contains('show'));
+  });
+
+  document.getElementById('helpToggle').addEventListener('click', function () {
+    help.classList.toggle('hidden');
+  });
+
+  function enterFullscreen() {
+    var request = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
+    if (!document.fullscreenElement && request) {
+      try {
+        var result = request.call(wrap);
+        if (result && result.catch) { result.catch(function () {}); }
+      } catch (e) { /* CSS still fills the browser viewport. */ }
+    }
+  }
+
+  fullscreenBtn.addEventListener('click', function () {
+    if (document.fullscreenElement) {
+      var exit = document.exitFullscreen || document.webkitExitFullscreen;
+      if (exit) { exit.call(document); }
+    } else {
+      enterFullscreen();
+    }
+  });
+
   // ---- emscripten module ----------------------------------------------
   // Mirrors the upstream launcher's known-good sequence: never auto-run main,
   // preload the data files as run-dependencies, then callMain() explicitly.
@@ -244,13 +312,16 @@
     info('[main] callMain');
 
     canvas.focus();
+    hud.classList.remove('hidden');
+    pad.classList.remove('hidden');
+    setTouchControls(touchDevice);
+    enterFullscreen();
 
     // Single-player only. The upstream launcher also passes -servername /
     // -autojoin for its WebSockets multiplayer; those make the client look for
     // a game server, which is not wanted here.
     var args = [
       '-iwad', 'freedoom1.wad',
-      '-window',
       '-nogui',
       '-nomusic',
       '-config', 'default.cfg',
@@ -268,6 +339,19 @@
       bootBtn.disabled = false;
       bootBtn.textContent = 'RETRY';
       started = false;
+      hud.classList.add('hidden');
+      pad.classList.add('hidden');
+      help.classList.add('hidden');
+    }
+  });
+
+  canvas.addEventListener('click', function () {
+    if (!started || touchDevice || document.pointerLockElement === canvas) { return; }
+    if (canvas.requestPointerLock) {
+      try {
+        var result = canvas.requestPointerLock();
+        if (result && result.catch) { result.catch(function () {}); }
+      } catch (e) { /* Mouse buttons still work without pointer lock. */ }
     }
   });
 

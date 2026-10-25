@@ -4,9 +4,13 @@ Doom in a browser page — the Chocolate Doom engine compiled to WebAssembly,
 running the Freedoom game data. Everything is served from this repository via
 GitHub Pages; the page fetches nothing from anywhere else.
 
-Open it, tap **TAP TO START**, and play. Touch controls are laid out below the
-viewport. A keyboard works too (arrows to move and turn, Ctrl to fire, Space to
-open doors, `,` / `.` to strafe, number keys to switch weapons).
+Open it, tap **TAP TO START**, and play. The game fills the browser viewport and
+requests fullscreen when the browser allows it. On touch screens, the controls
+overlay the game and can be collapsed with the controls button in the top-right
+corner. A keyboard works too (arrows to move and turn, A / D to strafe, Ctrl to
+fire, Space to open doors, Shift to run, number keys to switch weapons). Click
+the game view to capture the mouse for aiming; use the fullscreen button in the
+top-right corner to enter or leave fullscreen at any time.
 
 First load pulls about 35 MB. After that the browser cache serves it.
 
