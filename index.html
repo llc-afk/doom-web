@@ -478,13 +478,18 @@
     }
     args = args.concat([
       '-width', '800', '-height', '600',
-      '-warp', mapLevel.value.split(':')[0], mapLevel.value.split(':')[1],
       '-nogui',
       '-nomusic',
       '-config', 'default.cfg',
       '-extraconfig', 'chocolate-doom.cfg',
       '-savedir', '/savefiles'
     ]);
+    // Keep the engine's normal title menu on a fresh visit. Only warp when
+    // the player explicitly picked a level in the in-game map archive.
+    if (autoStartCampaign) {
+      var selectedMap = mapLevel.value.split(':');
+      args.push('-warp', selectedMap[0], selectedMap[1]);
+    }
 
     try {
       // eslint-disable-next-line no-undef
