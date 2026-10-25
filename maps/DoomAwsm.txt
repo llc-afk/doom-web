@@ -1,0 +1,59 @@
+===========================================================================
+Primary purpose         : Single Player
+===========================================================================
+Title                   : Doom: Awesome, Episode 1
+Filename                : DoomAwsm.wad
+Release date            : Nobody cares
+Author                  : Giest118
+Email Address           : giest1182000@yahoo.com
+Website                 : Naw
+Other Files By Author   : None
+Misc. Author Info       : Nobody cares
+Description             : Remember episode 1, the original? Remember how simple it is? Simple architecture, simple detail, simple puzzles. That's what made all of the original episodes KICK ASS. For years people took this single episode, a monument to the perfection of gameplay, and tried to replicate it. For a while it was enough. Not anymore. Nowadays, the only acceptable type of Doom wad is the kind that feels as little like Doom as possible. But when it gets to that point... who the hell cares about Doom? Why mod for a game which people still play for its simplicity if what you're going to try to accomplish is make it seem as modern as possible? Why mod for Doom, of all games? Well, whatever. I can't do anything about it. But I can make something. Here is a set of nine simple, but fun levels. Hopefully they will hold some feeling of nostalgia, as well as serve as a reminder of why we love Doom.
+Additional Credits to   : ID, CodeImp, Testers
+===========================================================================
+* What is included *
+
+New levels              : Yes
+Sounds                  : No
+Music                   : Yes
+Graphics                : No
+Dehacked/BEX Patch      : No
+Demos                   : No
+Other                   : MAPINFO (doesn't effect vanilla compatibility)
+Other files required    : No
+
+
+* Play Information *
+
+Game                    : DOOM
+Map #                   : E1M1-E1M9
+Single Player           : Designed for
+Cooperative 2-4 Player  : Yes
+Deathmatch 2-4 Player   : Yes
+Other game styles       : None
+Difficulty Settings     : Yes
+
+
+* Construction *
+
+Base                    : New from scratch
+Build Time              : Would have been like twelve days, but I got really lazy.
+Editor(s) used          : XWE, Doom Builder
+Known Bugs              : None
+May Not Run With        : Nothing comes to mind
+Tested with		: ZDoom, Chocolate Doom
+
+
+* Copyright / Permissions *
+
+You MAY distribute this file, provided you include this text file, with
+no modifications.  You may distribute this file in any electronic
+format (BBS, Diskette, CD, etc) as long as you include this file 
+intact.  I have received permission from the original authors of any
+modified or included content in this file to allow further distribution.
+
+
+* Where to get the file that this text file describes *
+
+If you have this text file, you probably have the wad.

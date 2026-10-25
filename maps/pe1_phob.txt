@@ -1,0 +1,77 @@
+===========================================================================
+Advanced engine needed  : 
+Primary purpose         : Single play
+===========================================================================
+Title                   : Simply Phobos
+Filename                : pe1_phob.wad (Levels), PE1_PMUS.WAD (Music)
+Release date            : 24 February 2010 (original release late 2004)
+Author                  : Paul Corfiatis (pcorf), Kristian Aro (Nebula)
+Email Address           : pcorfiatis@our.net.au and nebula83@netti.fi
+Other Files By Author   : Many
+
+Description             : Simply Phobos is an Episode 1 replacement for Doom. This is an upgrade
+		          that fixes a few bugs from the original release and has improved music.
+
+Changes since original
+release			: * Fixed a problem where a barrel and armor bonus overlapped in E1M5.
+			  * Removed the "Baron Swatter Cyberdemon" from E1M8. It was useless.
+			  * A few minor cosmetic changes here and there.
+			  * Music in seperate wad file so you now have a choice to play Simply
+			    Phobos with id's Episode 1 music or my music.
+			  * Music has been vastly improved for Windows Roland Sound Canvas GS 
+			    wavetable synth.
+			  		
+Credits			: Episode 1 made by Paul Corfiatis and runs in Vanilla Doom.
+                          E2M9 was created by Kristian Aro but needs a limit removing port.
+			  All music in PE1_PMUS.WAD composed by Paul Corfiatis	
+
+===========================================================================
+* What is included *
+
+New levels              : 10
+Sounds                  : No
+Music                   : Yes (PE1_PMUS.WAD)
+Graphics                : Yes
+Dehacked/BEX Patch      : No
+Demos                   : No
+Other                   : No
+
+
+* Play Information *
+
+Game                    : Doom (v1.666 and over)
+Map #                   : E1M1-E1M9, E2M9
+Single Player           : Designed for
+Cooperative 2-4 Player  : Player starts only
+Deathmatch 2-4 Player   : Player starts only
+Other game styles       : None
+Difficulty Settings     : Yes
+
+
+* Construction *
+
+Base                    : New from scratch
+Build Time              : About 4 months
+Editor(s) used          : Doom Builder, ZenNode, Wintex 4.3, etc
+Known Bugs              : Hopefully None
+May Not Run With...     : E2M9 requires a limit removing port.
+
+* Copyright / Permissions *
+
+Authors MAY NOT use the level this file as a base for modification or reuse.
+
+Authors MAY use other contents of this file as a base for modification or
+reuse.  Permissions have been obtained from original authors for any of
+their resources modified or included in this file.
+
+You MAY distribute this file, provided you include this text file, with no
+modifications.  You may distribute this file in any electronic format (BBS,
+Diskette, CD, etc) as long as you include this file intact.  I have
+received permission from the original authors of any modified or included
+content in this file to allow further distribution.
+
+* Where to get the file that this text file describes *
+
+The Usual: ftp://archives.3dgamers.com/pub/idgames/ and mirrors
+
+Web sites: PAULCORFIATIS.COM - http://www.paulcorfiatis.com/

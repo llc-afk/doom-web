@@ -12,7 +12,26 @@ fire, Space to open doors, Shift to run, number keys to switch weapons). Click
 the game view to capture the mouse for aiming; use the fullscreen button in the
 top-right corner to enter or leave fullscreen at any time.
 
-First load pulls about 35 MB. After that the browser cache serves it.
+First load pulls about 41 MB, including the optional episode packs. After that
+the browser cache serves the files.
+
+## Extra Doom 1 episodes
+
+The start screen lets you choose between Freedoom's campaign and three
+additional Episode 1 replacements: **Simply Phobos** (Paul Corfiatis and
+Kristian Aro), **Doom: Awesome, Episode 1** (Giest118), and **Phobos Revisited**
+(ReX Claussen). They run on the included Freedoom IWAD. The Simply Phobos
+archive also includes its optional music WAD; music remains disabled in this
+browser build. Its extra E2M9 map requires a limit-removing port, while its E1
+episode runs with Chocolate Doom.
+
+Each WAD is distributed with its original author-provided text file, as the
+authors' permissions require. Those text files are kept unmodified beside the
+WADs in `maps/`.
+
+The game renders at Doom's original 320×200 resolution. Chocolate Doom's smooth
+pixel scaling and browser interpolation are enabled to soften the enlarged
+pixels while preserving the original artwork.
 
 ---
 
@@ -42,8 +61,9 @@ were taken from the published GitHub Pages deployment of:
 The complete corresponding source for these binaries is the tree at
 `Saketh-Chandra/doom-wasm-pwa@a77edfd8bbc7`, publicly available at the URL above.
 
-No modifications were made to the engine. The only original code in this
-repository is `index.html`.
+No modifications were made to the engine binaries. The browser launcher and
+presentation are in `index.html`; `default.cfg` and `chocolate-doom.cfg` contain
+game and display settings.
 
 ### The game data — BSD 3-clause
 

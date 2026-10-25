@@ -18,15 +18,13 @@
      depth and contrast on modern high-density displays. */
   #screen::after {
     content: ""; position: absolute; inset: 0; z-index: 4; pointer-events: none;
-    background: radial-gradient(ellipse at center, transparent 52%, #0009 100%),
-      linear-gradient(180deg, #ffffff08 50%, #0000000b 50%);
-    background-size: auto, 100% 4px;
+    background: radial-gradient(ellipse at center, transparent 62%, #0007 100%);
     box-shadow: inset 0 0 90px #0008;
   }
   canvas {
     display: block; width: 100%; height: 100%;
-    object-fit: contain; image-rendering: pixelated; outline: none;
-    filter: contrast(1.08) saturate(1.12);
+    object-fit: contain; image-rendering: auto; outline: none;
+    filter: contrast(1.02) saturate(1.12);
     background: #000; touch-action: none;
   }
 
@@ -47,6 +45,10 @@
   }
   #bootBtn:not([disabled]):hover { transform: translateY(-2px); filter: brightness(1.15); }
   #bootBtn[disabled] { background: #3a2020; color: #8a8a8a; }
+  #campaignPicker { width: min(420px, 100%); margin-top: 24px; text-align: left; }
+  #campaignPicker label { display: block; margin-bottom: 8px; color: #d4a879; font-size: 10px; font-weight: 800; letter-spacing: .2em; }
+  #campaignSelect { width: 100%; padding: 13px 14px; border: 1px solid #ffffff33; border-radius: 4px; background: #101010ed; color: #f4eee8; font: inherit; font-size: 14px; }
+  #campaignNote { margin-top: 7px; color: #89817b; font-size: 11px; line-height: 1.5; }
 
   /* Visible log. The whole point is that a failure is legible without a
      desktop console — on a phone there is nowhere else for this to go. */
@@ -94,6 +96,16 @@
       <div style="margin-bottom:20px;color:#e0b07a;font-size:10px;font-weight:700;letter-spacing:.34em">UAC MARS FACILITY · EST. 2145</div>
       <div id="bootTitle">DOOM</div>
       <div id="bootHint">THE CLASSIC FPS · REFORGED FOR THE WEB<br>Freedoom Edition &nbsp;·&nbsp; Keyboard and touch controls</div>
+      <div id="campaignPicker">
+        <label for="campaignSelect">ESCOLHA SUA CAMPANHA</label>
+        <select id="campaignSelect">
+          <option value="freedoom">Freedoom · Episódio 1</option>
+          <option value="simply-phobos">Simply Phobos · 10 mapas</option>
+          <option value="doom-awesome">Doom: Awesome · 9 mapas</option>
+          <option value="phobos-revisited">Phobos Revisited · 9 mapas</option>
+        </select>
+        <div id="campaignNote">Campanha original incluída. Os episódios adicionais rodam sobre Freedoom.</div>
+      </div>
       <button id="bootBtn" type="button" disabled>LOADING…</button>
       <div id="log"></div>
     </div>
@@ -150,6 +162,8 @@
   var help = document.getElementById('help');
   var wrap = document.getElementById('wrap');
   var logEl = document.getElementById('log');
+  var campaignSelect = document.getElementById('campaignSelect');
+  var campaignNote = document.getElementById('campaignNote');
   var touchDevice = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 760;
 
   var lines = 0;
@@ -279,7 +293,26 @@
   // ---- emscripten module ----------------------------------------------
   // Mirrors the upstream launcher's known-good sequence: never auto-run main,
   // preload the data files as run-dependencies, then callMain() explicitly.
-  var PRELOAD = ['freedoom1.wad', 'default.cfg'];
+  var PRELOAD = [
+    'freedoom1.wad', 'default.cfg', 'chocolate-doom.cfg',
+    'maps/pe1_phob.wad', 'maps/PE1_PMUS.WAD',
+    'maps/DoomAwsm.wad', 'maps/phobos-v.wad'
+  ];
+  var CAMPAIGNS = {
+    freedoom: [],
+    'simply-phobos': ['maps/pe1_phob.wad', 'maps/PE1_PMUS.WAD'],
+    'doom-awesome': ['maps/DoomAwsm.wad'],
+    'phobos-revisited': ['maps/phobos-v.wad']
+  };
+  var campaignDescriptions = {
+    freedoom: 'Campanha original incluída. Os episódios adicionais rodam sobre Freedoom.',
+    'simply-phobos': '10 mapas, com música original. O episódio secreto E2M9 pode exigir um port com limites ampliados.',
+    'doom-awesome': '9 mapas novos, com visual e ritmo próximos do Doom clássico.',
+    'phobos-revisited': '9 mapas de episódio, redesenhados para uma jornada mais desafiadora.'
+  };
+  campaignSelect.addEventListener('change', function () {
+    campaignNote.textContent = campaignDescriptions[campaignSelect.value];
+  });
   var started = false;
 
   window.Module = {
@@ -297,10 +330,13 @@
 
     preRun: function () {
       try { window.Module.FS.mkdir('/savefiles'); } catch (e) { /* already exists */ }
+      try { window.Module.FS.mkdir('/maps'); } catch (e) { /* already exists */ }
       PRELOAD.forEach(function (f) {
         info('[preload] ' + f);
-        // parent "" + canOwn=true is what this build expects.
-        window.Module.FS.createPreloadedFile('', f, f, true, true);
+        var separator = f.lastIndexOf('/');
+        var parent = separator === -1 ? '' : '/' + f.slice(0, separator);
+        var name = separator === -1 ? f : f.slice(separator + 1);
+        window.Module.FS.createPreloadedFile(parent, name, f, true, true);
       });
     },
 
@@ -335,13 +371,19 @@
     // Single-player only. The upstream launcher also passes -servername /
     // -autojoin for its WebSockets multiplayer; those make the client look for
     // a game server, which is not wanted here.
-    var args = [
-      '-iwad', 'freedoom1.wad',
+    var selectedWads = CAMPAIGNS[campaignSelect.value] || [];
+    var args = ['-iwad', 'freedoom1.wad'];
+    if (selectedWads.length) {
+      args.push('-file');
+      args = args.concat(selectedWads);
+    }
+    args = args.concat([
       '-nogui',
       '-nomusic',
       '-config', 'default.cfg',
+      '-extraconfig', 'chocolate-doom.cfg',
       '-savedir', '/savefiles'
-    ];
+    ]);
 
     try {
       // eslint-disable-next-line no-undef
