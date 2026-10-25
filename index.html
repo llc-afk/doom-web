@@ -45,10 +45,18 @@
   }
   #bootBtn:not([disabled]):hover { transform: translateY(-2px); filter: brightness(1.15); }
   #bootBtn[disabled] { background: #3a2020; color: #8a8a8a; }
-  #campaignPicker { width: min(420px, 100%); margin-top: 24px; text-align: left; }
-  #campaignPicker label { display: block; margin-bottom: 8px; color: #d4a879; font-size: 10px; font-weight: 800; letter-spacing: .2em; }
+  #mapToggle { width: auto; padding: 0 12px; font-size: 10px; font-weight: 800; letter-spacing: .12em; }
+  #mapMenu { position: absolute; z-index: 35; top: max(60px, calc(env(safe-area-inset-top) + 52px)); right: max(10px, env(safe-area-inset-right)); width: min(360px, calc(100vw - 20px)); padding: 18px; color: #eee; background: #090d0ef5; border: 1px solid #ffffff35; border-radius: 10px; box-shadow: 0 12px 40px #000b; }
+  #mapMenu.hidden { display: none; }
+  #mapMenu h2 { margin: 0; color: #e4b33d; font-size: 13px; letter-spacing: .17em; }
+  #mapCurrent { margin: 8px 0 16px; color: #aaa; font-size: 11px; }
+  #mapMenu label { display: block; margin-bottom: 8px; color: #d4a879; font-size: 10px; font-weight: 800; letter-spacing: .2em; }
   #campaignSelect { width: 100%; padding: 13px 14px; border: 1px solid #ffffff33; border-radius: 4px; background: #101010ed; color: #f4eee8; font: inherit; font-size: 14px; }
-  #campaignNote { margin-top: 7px; color: #89817b; font-size: 11px; line-height: 1.5; }
+  #campaignNote { min-height: 34px; margin-top: 8px; color: #aaa19a; font-size: 11px; line-height: 1.5; }
+  .map-actions { display: flex; gap: 8px; margin-top: 14px; }
+  .map-actions button { flex: 1; min-height: 40px; border: 1px solid #ffffff30; border-radius: 5px; color: #eee; background: #17191b; font-weight: 700; letter-spacing: .08em; }
+  #loadCampaign { background: #9d211b; border-color: #f36b5566; }
+  .map-menu-hint { margin: 12px 0 0; color: #777; font-size: 10px; line-height: 1.5; }
 
   /* Visible log. The whole point is that a failure is legible without a
      desktop console — on a phone there is nowhere else for this to go. */
@@ -96,16 +104,6 @@
       <div style="margin-bottom:20px;color:#e0b07a;font-size:10px;font-weight:700;letter-spacing:.34em">UAC MARS FACILITY · EST. 2145</div>
       <div id="bootTitle">DOOM</div>
       <div id="bootHint">THE CLASSIC FPS · REFORGED FOR THE WEB<br>Freedoom Edition &nbsp;·&nbsp; Keyboard and touch controls</div>
-      <div id="campaignPicker">
-        <label for="campaignSelect">ESCOLHA SUA CAMPANHA</label>
-        <select id="campaignSelect">
-          <option value="freedoom">Freedoom · Episódio 1</option>
-          <option value="simply-phobos">Simply Phobos · 10 mapas</option>
-          <option value="doom-awesome">Doom: Awesome · 9 mapas</option>
-          <option value="phobos-revisited">Phobos Revisited · 9 mapas</option>
-        </select>
-        <div id="campaignNote">Campanha original incluída. Os episódios adicionais rodam sobre Freedoom.</div>
-      </div>
       <button id="bootBtn" type="button" disabled>LOADING…</button>
       <div id="log"></div>
     </div>
@@ -135,6 +133,7 @@
   </div>
 
   <div id="hud" class="hidden" aria-label="Game options">
+    <button id="mapToggle" class="hud-btn" type="button" aria-label="Open map menu" aria-expanded="false">MAPAS</button>
     <button id="touchToggle" class="hud-btn" type="button" aria-label="Toggle touch controls" aria-expanded="false">☷</button>
     <button id="helpToggle" class="hud-btn" type="button" aria-label="Show controls">?</button>
     <button id="fullscreenBtn" class="hud-btn" type="button" aria-label="Toggle fullscreen">⛶</button>
@@ -144,7 +143,26 @@
     Arrows: move and turn &middot; A / D: strafe<br>
     Ctrl / left click: fire &middot; Space: use doors<br>
     Shift: run &middot; 1–3: weapons<br>
-    Tap the fullscreen icon for immersive play.
+    MAPAS: choose a campaign and level &middot; fullscreen icon: immersive play.
+  </div>
+  <div id="mapMenu" class="hidden" role="dialog" aria-label="Campaign and map menu">
+    <h2>ARQUIVO DE CAMPANHAS</h2>
+    <div id="mapCurrent">Campanha ativa: Freedoom · Episódio 1</div>
+    <label for="campaignSelect">ESCOLHA UMA CAMPANHA</label>
+    <select id="campaignSelect">
+      <option value="freedoom">Freedoom · Episódio 1</option>
+      <option value="simply-phobos">Simply Phobos · 10 mapas</option>
+      <option value="doom-awesome">Doom: Awesome · 9 mapas</option>
+      <option value="phobos-revisited">Phobos Revisited · 9 mapas</option>
+    </select>
+    <label for="mapLevel" style="margin-top:14px">ESCOLHA UM MAPA</label>
+    <select id="mapLevel"></select>
+    <div id="campaignNote">Campanha original incluída; escolha um episódio para carregar.</div>
+    <div class="map-actions">
+      <button id="closeMapMenu" type="button">VOLTAR</button>
+      <button id="loadCampaign" type="button">CARREGAR</button>
+    </div>
+    <p class="map-menu-hint">Trocar de campanha reinicia a sessão e abre o novo episódio.</p>
   </div>
 </div>
 
@@ -162,7 +180,12 @@
   var help = document.getElementById('help');
   var wrap = document.getElementById('wrap');
   var logEl = document.getElementById('log');
+  var mapMenu = document.getElementById('mapMenu');
+  var mapToggle = document.getElementById('mapToggle');
+  var mapCurrent = document.getElementById('mapCurrent');
+  var loadCampaign = document.getElementById('loadCampaign');
   var campaignSelect = document.getElementById('campaignSelect');
+  var mapLevel = document.getElementById('mapLevel');
   var campaignNote = document.getElementById('campaignNote');
   var touchDevice = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 760;
 
@@ -267,6 +290,19 @@
     setTouchControls(!pad.classList.contains('show'));
   });
 
+  mapToggle.addEventListener('click', function () {
+    var open = mapMenu.classList.contains('hidden');
+    mapMenu.classList.toggle('hidden', !open);
+    mapToggle.classList.toggle('on', open);
+    mapToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+
+  document.getElementById('closeMapMenu').addEventListener('click', function () {
+    mapMenu.classList.add('hidden');
+    mapToggle.classList.remove('on');
+    mapToggle.setAttribute('aria-expanded', 'false');
+  });
+
   document.getElementById('helpToggle').addEventListener('click', function () {
     help.classList.toggle('hidden');
   });
@@ -304,14 +340,73 @@
     'doom-awesome': ['maps/DoomAwsm.wad'],
     'phobos-revisited': ['maps/phobos-v.wad']
   };
+  function episodeMaps(episodes) {
+    var result = [];
+    episodes.forEach(function (episode) {
+      for (var map = 1; map <= 9; map++) {
+        result.push({ key: episode + ':' + map, label: 'E' + episode + 'M' + map });
+      }
+    });
+    return result;
+  }
+  var CAMPAIGN_MAPS = {
+    freedoom: episodeMaps([1, 2, 3, 4]),
+    'simply-phobos': episodeMaps([1]).concat([{ key: '2:9', label: 'E2M9 · limites ampliados' }]),
+    'doom-awesome': episodeMaps([1]),
+    'phobos-revisited': episodeMaps([1])
+  };
   var campaignDescriptions = {
     freedoom: 'Campanha original incluída. Os episódios adicionais rodam sobre Freedoom.',
     'simply-phobos': '10 mapas, com música original. O episódio secreto E2M9 pode exigir um port com limites ampliados.',
     'doom-awesome': '9 mapas novos, com visual e ritmo próximos do Doom clássico.',
     'phobos-revisited': '9 mapas de episódio, redesenhados para uma jornada mais desafiadora.'
   };
+  var storedCampaign = sessionStorage.getItem('doomCampaign');
+  var currentCampaign = Object.prototype.hasOwnProperty.call(CAMPAIGNS, storedCampaign) ? storedCampaign : 'freedoom';
+  var storedMap = sessionStorage.getItem('doomMap') || '1:1';
+  var currentMapKey = storedMap;
+  var autoStartCampaign = sessionStorage.getItem('doomAutoStart') === '1';
+  campaignSelect.value = currentCampaign;
+  function populateMapList(campaign, selectedKey) {
+    var choices = CAMPAIGN_MAPS[campaign] || CAMPAIGN_MAPS.freedoom;
+    mapLevel.textContent = '';
+    choices.forEach(function (entry) {
+      var option = document.createElement('option');
+      option.value = entry.key;
+      option.textContent = entry.label;
+      mapLevel.appendChild(option);
+    });
+    mapLevel.value = choices.some(function (entry) { return entry.key === selectedKey; }) ? selectedKey : choices[0].key;
+  }
+  populateMapList(currentCampaign, currentMapKey);
+  currentMapKey = mapLevel.value;
+  function updateMapMenuNote() {
+    campaignNote.textContent = campaignSelect.value === 'simply-phobos' && mapLevel.value === '2:9'
+      ? 'E2M9 usa limites ampliados e pode não funcionar neste motor clássico.'
+      : campaignDescriptions[campaignSelect.value];
+    var changed = campaignSelect.value !== currentCampaign || mapLevel.value !== currentMapKey;
+    loadCampaign.disabled = !changed;
+    loadCampaign.style.opacity = changed ? '1' : '.55';
+  }
+  mapCurrent.textContent = 'Ativo: ' + campaignSelect.options[campaignSelect.selectedIndex].text + ' · ' + mapLevel.options[mapLevel.selectedIndex].text;
+  updateMapMenuNote();
+
   campaignSelect.addEventListener('change', function () {
-    campaignNote.textContent = campaignDescriptions[campaignSelect.value];
+    populateMapList(campaignSelect.value, '1:1');
+    updateMapMenuNote();
+  });
+  mapLevel.addEventListener('change', updateMapMenuNote);
+
+  function reloadSelectedMap() {
+    if (loadCampaign.disabled) { return; }
+    sessionStorage.setItem('doomCampaign', campaignSelect.value);
+    sessionStorage.setItem('doomMap', mapLevel.value);
+    sessionStorage.setItem('doomAutoStart', '1');
+    window.location.reload();
+  }
+  loadCampaign.addEventListener('click', reloadSelectedMap);
+  mapLevel.addEventListener('keydown', function (event) {
+    if (event.key === 'Enter') { reloadSelectedMap(); }
   });
   var started = false;
 
@@ -348,6 +443,10 @@
       } catch (e) { err('[fs] readdir failed: ' + e); }
       bootBtn.disabled = false;
       bootBtn.textContent = 'TAP TO START';
+      if (autoStartCampaign) {
+        sessionStorage.removeItem('doomAutoStart');
+        window.setTimeout(function () { bootBtn.click(); }, 0);
+      }
     },
 
     onExit: function (status) {
@@ -371,13 +470,15 @@
     // Single-player only. The upstream launcher also passes -servername /
     // -autojoin for its WebSockets multiplayer; those make the client look for
     // a game server, which is not wanted here.
-    var selectedWads = CAMPAIGNS[campaignSelect.value] || [];
+    var selectedWads = CAMPAIGNS[currentCampaign] || [];
     var args = ['-iwad', 'freedoom1.wad'];
     if (selectedWads.length) {
       args.push('-file');
       args = args.concat(selectedWads);
     }
     args = args.concat([
+      '-width', '800', '-height', '600',
+      '-warp', mapLevel.value.split(':')[0], mapLevel.value.split(':')[1],
       '-nogui',
       '-nomusic',
       '-config', 'default.cfg',

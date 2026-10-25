@@ -5,19 +5,21 @@ running the Freedoom game data. Everything is served from this repository via
 GitHub Pages; the page fetches nothing from anywhere else.
 
 Open it, tap **TAP TO START**, and play. The game fills the browser viewport and
-requests fullscreen when the browser allows it. On touch screens, the controls
-overlay the game and can be collapsed with the controls button in the top-right
-corner. A keyboard works too (arrows to move and turn, A / D to strafe, Ctrl to
-fire, Space to open doors, Shift to run, number keys to switch weapons). Click
-the game view to capture the mouse for aiming; use the fullscreen button in the
-top-right corner to enter or leave fullscreen at any time.
+requests fullscreen when the browser allows it. The **MAPAS** button in the
+in-game toolbar opens one menu with every campaign and map; changing either
+reloads directly into the selected level. On touch
+screens, the controls overlay the game and can be collapsed with the controls
+button in the top-right corner. A keyboard works too (arrows to move and turn,
+A / D to strafe, Ctrl to fire, Space to open doors, Shift to run, number keys
+to switch weapons). Click the game view to capture the mouse for aiming; use
+the fullscreen button in the top-right corner to enter or leave fullscreen.
 
 First load pulls about 41 MB, including the optional episode packs. After that
 the browser cache serves the files.
 
 ## Extra Doom 1 episodes
 
-The start screen lets you choose between Freedoom's campaign and three
+The in-game map menu lets you choose between Freedoom's campaign and three
 additional Episode 1 replacements: **Simply Phobos** (Paul Corfiatis and
 Kristian Aro), **Doom: Awesome, Episode 1** (Giest118), and **Phobos Revisited**
 (ReX Claussen). They run on the included Freedoom IWAD. The Simply Phobos
@@ -29,9 +31,11 @@ Each WAD is distributed with its original author-provided text file, as the
 authors' permissions require. Those text files are kept unmodified beside the
 WADs in `maps/`.
 
-The game renders at Doom's original 320×200 resolution. Chocolate Doom's smooth
-pixel scaling and browser interpolation are enabled to soften the enlarged
-pixels while preserving the original artwork.
+The browser output is configured for 800×600, with smooth scaling enabled. The
+Chocolate Doom engine still draws the original game scene at 320×200 before
+upscaling it, so this smooths the enlarged pixels but does not create new detail
+in the original art. Simply Phobos's E2M9 appears in the map list but may need a
+limit-removing source port, as noted by its authors.
 
 ---
 
